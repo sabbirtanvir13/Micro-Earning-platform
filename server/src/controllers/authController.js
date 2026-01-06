@@ -1,18 +1,69 @@
 import jwt from 'jsonwebtoken';
 import admin from 'firebase-admin';
+import fs from 'fs';
+import path from 'path';
 import User from '../models/User.js';
 import { createNotification } from '../utils/notificationHelper.js';
 
-// Initialize Firebase Admin if not already initialized
+// Initialize Firebase Admin if not already initialized and env vars are present
 if (!admin.apps.length) {
+  // Look for serviceAccountKey.json in several likely locations (fix path issues)
+  const candidatePaths = [
+    path.resolve(process.cwd(), 'serviceAccountKey.json'),
+    path.resolve(process.cwd(), 'server', 'serviceAccountKey.json'),
+    path.resolve(process.cwd(), '..', 'server', 'serviceAccountKey.json'),
+  ];
+
+  let keyFile = candidatePaths.find((p) => fs.existsSync(p));
+  const hasKeyFile = Boolean(keyFile);
+
+  const firebaseProjectId = process.env.FIREBASE_PROJECT_ID;
+  const firebasePrivateKey = process.env.FIREBASE_PRIVATE_KEY;
+  const firebaseClientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+
+  const looksLikePem = (key) => typeof key === 'string' && /-----BEGIN PRIVATE KEY-----/.test(key) && /-----END PRIVATE KEY-----/.test(key);
+
   try {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      }),
-    });
+    let initialized = false;
+
+    if (hasKeyFile) {
+      const raw = fs.readFileSync(keyFile, 'utf8');
+      try {
+        const serviceAccount = JSON.parse(raw);
+        if (!serviceAccount.private_key || !looksLikePem(serviceAccount.private_key)) {
+          console.warn('serviceAccountKey.json found but private_key looks invalid; skipping file-based Firebase init.');
+        } else {
+          admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+          console.log('Firebase Admin initialized from serviceAccountKey.json');
+          initialized = true;
+        }
+      } catch (jsonErr) {
+        console.error('Failed to parse serviceAccountKey.json at', keyFile);
+        console.error('First 800 chars of file:', raw.slice(0, 800));
+        console.warn('serviceAccountKey.json is not valid JSON; will attempt env-var initialization if available.');
+      }
+    }
+
+    if (!initialized && firebaseProjectId && firebasePrivateKey && firebaseClientEmail) {
+      const fixedKey = firebasePrivateKey.replace(/\\n/g, '\n');
+      if (!looksLikePem(fixedKey)) {
+        console.warn('FIREBASE_PRIVATE_KEY found but does not appear to be a valid PEM; wrap the key with quotes and use \\n+ to represent newlines, or place serviceAccountKey.json in server/.');
+      } else {
+        admin.initializeApp({
+          credential: admin.credential.cert({
+            projectId: firebaseProjectId,
+            privateKey: fixedKey,
+            clientEmail: firebaseClientEmail,
+          }),
+        });
+        console.log('Firebase Admin initialized from environment variables');
+        initialized = true;
+      }
+    }
+
+    if (!initialized) {
+      console.warn('Skipping Firebase Admin initialization: set FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY, and FIREBASE_CLIENT_EMAIL in server/.env or provide a valid server/serviceAccountKey.json');
+    }
   } catch (error) {
     console.error('Firebase Admin initialization error:', error);
   }
@@ -33,7 +84,45 @@ export const verifyFirebase = async (req, res) => {
       return res.status(400).json({ message: 'Firebase token required' });
     }
 
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    let decodedToken;
+
+    if (admin.apps.length) {
+      // Prefer Admin SDK when available
+      decodedToken = await admin.auth().verifyIdToken(idToken);
+    } else {
+      // Fallback: use Firebase Auth REST API to lookup token (requires FIREBASE_API_KEY)
+      const apiKey = process.env.FIREBASE_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ message: 'Firebase Admin not configured on server' });
+      }
+
+      const lookupUrl = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`;
+      const lookupRes = await fetch(lookupUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (!lookupRes.ok) {
+        const text = await lookupRes.text();
+        console.error('Firebase REST lookup failed:', lookupRes.status, text);
+        return res.status(401).json({ message: 'Invalid Firebase token (REST lookup failed)' });
+      }
+
+      const lookupJson = await lookupRes.json();
+      const userRecord = lookupJson.users && lookupJson.users[0];
+      if (!userRecord) {
+        return res.status(401).json({ message: 'Invalid Firebase token' });
+      }
+
+      decodedToken = {
+        email: userRecord.email,
+        name: userRecord.displayName,
+        picture: userRecord.photoUrl,
+        uid: userRecord.localId,
+      };
+    }
+
     const { email, name, picture, uid } = decodedToken;
 
     // Find or create user

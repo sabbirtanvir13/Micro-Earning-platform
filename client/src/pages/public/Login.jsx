@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { isFirebaseConfigured } from '../../services/firebase.config';
@@ -12,12 +12,14 @@ const Login = () => {
   const navigate = useNavigate();
 
   // Redirect if already logged in
-  if (user) {
-    if (user.role === 'worker') navigate('/worker/dashboard');
-    else if (user.role === 'buyer') navigate('/buyer/dashboard');
-    else if (user.role === 'admin') navigate('/admin/dashboard');
-    else navigate('/select-role');
-  }
+  useEffect(() => {
+    if (user && !loading) {
+      if (user.role === 'worker') navigate('/worker/dashboard');
+      else if (user.role === 'buyer') navigate('/buyer/dashboard');
+      else if (user.role === 'admin') navigate('/admin/dashboard');
+      else navigate('/select-role');
+    }
+  }, [user, loading, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

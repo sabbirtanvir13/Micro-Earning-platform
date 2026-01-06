@@ -6,6 +6,8 @@ import {
   signInWithPopup,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  fetchSignInMethodsForEmail,
+  updateProfile,
 } from 'firebase/auth';
 import api from '../services/api';
 
@@ -18,6 +20,8 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export { isFirebaseConfigured } from '../services/firebase.config';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -111,7 +115,7 @@ export const AuthProvider = ({ children }) => {
         password
       );
       if (displayName) {
-        await userCredential.user.updateProfile({ displayName });
+        await updateProfile(userCredential.user, { displayName });
       }
       const idToken = await userCredential.user.getIdToken();
       const response = await api.post('/auth/verify-firebase', { idToken });
@@ -122,6 +126,16 @@ export const AuthProvider = ({ children }) => {
       return { success: true, user: userData };
     } catch (error) {
       console.error('Register error:', error);
+      // If the email is already in use, return available sign-in methods so the UI can guide the user
+      if (error?.code === 'auth/email-already-in-use') {
+        try {
+          const methods = await fetchSignInMethodsForEmail(auth, email);
+          return { success: false, error: 'Email already in use', code: error.code, providers: methods };
+        } catch (fetchErr) {
+          console.error('Error fetching sign-in methods:', fetchErr);
+          return { success: false, error: 'Email already in use', code: error.code };
+        }
+      }
       return { success: false, error: error.message };
     }
   };

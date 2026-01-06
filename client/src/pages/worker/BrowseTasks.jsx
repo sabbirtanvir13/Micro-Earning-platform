@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
@@ -12,11 +13,17 @@ const BrowseTasks = () => {
   useEffect(() => {
     fetchTasks();
   }, [page]);
+  
+  // watch query param
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const q = params.get('q') || '';
 
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/tasks/available?page=${page}&limit=10`);
+      const qParam = q ? `&q=${encodeURIComponent(q)}` : '';
+      const response = await api.get(`/tasks/available?page=${page}&limit=10${qParam}`);
       setTasks(response.data.tasks || []);
       setPagination(response.data.pagination || {});
     } catch (error) {

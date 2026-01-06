@@ -10,6 +10,12 @@ const app = express();
 // Middleware
 app.use(cors());
 
+// Allow popups from Google/Firebase auth to interact with the opener
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  next();
+});
+
 // Webhook routes (must be before JSON body parser)
 import webhookRoutes from './routes/webhookRoutes.js';
 app.use('/api/webhooks', webhookRoutes);

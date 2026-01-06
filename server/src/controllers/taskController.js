@@ -6,11 +6,20 @@ import { createNotification } from '../utils/notificationHelper.js';
 // Get all available tasks (for workers)
 export const getAvailableTasks = async (req, res) => {
   try {
-    const { status = 'open', category, page = 1, limit = 10 } = req.query;
+    const { status = 'open', category, page = 1, limit = 10, q } = req.query;
     const skip = (page - 1) * limit;
 
     const query = { status };
     if (category) query.category = category;
+    // text / keyword search across title, description, and category
+    if (q && q.trim()) {
+      const re = new RegExp(q.trim().replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'), 'i');
+      query.$or = [
+        { title: re },
+        { description: re },
+        { category: re },
+      ];
+    }
 
     const tasks = await Task.find(query)
       .populate('buyerId', 'displayName email')
