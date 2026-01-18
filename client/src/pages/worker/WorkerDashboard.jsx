@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -8,8 +9,10 @@ const WorkerDashboard = () => {
     pendingSubmissions: 0,
     approvedSubmissions: 0,
     totalCoins: 0,
+    rejectedSubmissions: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [recentSubmissions, setRecentSubmissions] = useState([]);
 
   useEffect(() => {
     fetchStats();
@@ -27,13 +30,17 @@ const WorkerDashboard = () => {
 
       const pending = submissions.filter((s) => s.status === 'pending').length;
       const approved = submissions.filter((s) => s.status === 'approved').length;
+      const rejected = submissions.filter((s) => s.status === 'rejected').length;
 
       setStats({
         totalEarned: user.totalEarned || 0,
         pendingSubmissions: pending,
         approvedSubmissions: approved,
+        rejectedSubmissions: rejected,
         totalCoins: user.coins || 0,
       });
+
+      setRecentSubmissions(submissions.slice(0, 5));
     } catch (error) {
       toast.error('Failed to load dashboard stats');
     } finally {
@@ -49,32 +56,145 @@ const WorkerDashboard = () => {
     );
   }
 
+  const successRate = stats.approvedSubmissions + stats.rejectedSubmissions > 0
+    ? Math.round((stats.approvedSubmissions / (stats.approvedSubmissions + stats.rejectedSubmissions)) * 100)
+    : 0;
+
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6">Dashboard Overview</h2>
+    <div className="space-y-8">
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
+        <h1 className="text-3xl font-bold mb-2">Welcome Back, Worker! 👋</h1>
+        <p className="text-blue-100">Here's your performance overview</p>
+      </div>
+
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="text-gray-600 text-sm mb-2">Total Earned</div>
-          <div className="text-3xl font-bold text-green-600">
-            {stats.totalEarned} coins
+        {/* Total Earned */}
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-green-500 rounded-xl">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <span className="text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">
+              +12% this month
+            </span>
           </div>
+          <div className="text-gray-600 text-sm mb-1">Total Earned</div>
+          <div className="text-3xl font-black text-green-700">{stats.totalEarned} <span className="text-lg">coins</span></div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="text-gray-600 text-sm mb-2">Current Balance</div>
-          <div className="text-3xl font-bold text-blue-600">
-            {stats.totalCoins} coins
+
+        {/* Current Balance */}
+        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-blue-500 rounded-xl">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+            </div>
+            <Link to="/worker/withdraw" className="text-xs font-semibold text-blue-600 hover:text-blue-700">
+              Withdraw →
+            </Link>
           </div>
+          <div className="text-gray-600 text-sm mb-1">Available Balance</div>
+          <div className="text-3xl font-black text-blue-700">{stats.totalCoins} <span className="text-lg">coins</span></div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="text-gray-600 text-sm mb-2">Pending Submissions</div>
-          <div className="text-3xl font-bold text-yellow-600">
-            {stats.pendingSubmissions}
+
+        {/* Pending Submissions */}
+        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 border border-yellow-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-yellow-500 rounded-xl">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <span className="text-xs font-semibold text-yellow-600 bg-yellow-100 px-2 py-1 rounded-full">
+              In Review
+            </span>
           </div>
+          <div className="text-gray-600 text-sm mb-1">Pending Submissions</div>
+          <div className="text-3xl font-black text-yellow-700">{stats.pendingSubmissions}</div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="text-gray-600 text-sm mb-2">Approved Submissions</div>
-          <div className="text-3xl font-bold text-green-600">
-            {stats.approvedSubmissions}
+
+        {/* Success Rate */}
+        <div className="bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 rounded-2xl p-6 hover:shadow-lg transition-shadow duration-300">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-purple-500 rounded-xl">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <span className="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
+              Excellent
+            </span>
+          </div>
+          <div className="text-gray-600 text-sm mb-1">Success Rate</div>
+          <div className="text-3xl font-black text-purple-700">{successRate}%</div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Link to="/worker/tasks" className="group bg-white border-2 border-gray-200 hover:border-blue-500 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-blue-100 group-hover:bg-blue-500 rounded-xl transition-colors">
+              <svg className="w-6 h-6 text-blue-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <div>
+              <div className="font-bold text-gray-900">Browse Tasks</div>
+              <div className="text-sm text-gray-500">Find new opportunities</div>
+            </div>
+          </div>
+        </Link>
+
+        <Link to="/worker/my-submissions" className="group bg-white border-2 border-gray-200 hover:border-purple-500 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-purple-100 group-hover:bg-purple-500 rounded-xl transition-colors">
+              <svg className="w-6 h-6 text-purple-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div>
+              <div className="font-bold text-gray-900">My Submissions</div>
+              <div className="text-sm text-gray-500">Track your work</div>
+            </div>
+          </div>
+        </Link>
+
+        <Link to="/worker/earnings" className="group bg-white border-2 border-gray-200 hover:border-green-500 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-green-100 group-hover:bg-green-500 rounded-xl transition-colors">
+              <svg className="w-6 h-6 text-green-600 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+            </div>
+            <div>
+              <div className="font-bold text-gray-900">View Earnings</div>
+              <div className="text-sm text-gray-500">Check your income</div>
+            </div>
+          </div>
+        </Link>
+      </div>
+
+      {/* Performance Overview */}
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+        <h3 className="text-xl font-bold mb-6">Performance Overview</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="text-center p-4 bg-green-50 rounded-xl">
+            <div className="text-3xl font-black text-green-600 mb-2">{stats.approvedSubmissions}</div>
+            <div className="text-sm text-gray-600">Approved</div>
+          </div>
+          <div className="text-center p-4 bg-yellow-50 rounded-xl">
+            <div className="text-3xl font-black text-yellow-600 mb-2">{stats.pendingSubmissions}</div>
+            <div className="text-sm text-gray-600">Pending</div>
+          </div>
+          <div className="text-center p-4 bg-red-50 rounded-xl">
+            <div className="text-3xl font-black text-red-600 mb-2">{stats.rejectedSubmissions}</div>
+            <div className="text-sm text-gray-600">Rejected</div>
           </div>
         </div>
       </div>
