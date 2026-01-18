@@ -127,28 +127,28 @@ const Footer = () => {
             <h4 className="font-bold text-lg mb-4 text-white">Company</h4>
             <ul className="space-y-3">
               <li>
-                <a href="#about" className="text-gray-400 hover:text-blue-400 transition-colors duration-200 flex items-center group">
+                <Link to="/about" className="text-gray-400 hover:text-blue-400 transition-colors duration-200 flex items-center group">
                   <span className="mr-2 group-hover:mr-3 transition-all">→</span>
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#contact" className="text-gray-400 hover:text-blue-400 transition-colors duration-200 flex items-center group">
+                <Link to="/contact" className="text-gray-400 hover:text-blue-400 transition-colors duration-200 flex items-center group">
                   <span className="mr-2 group-hover:mr-3 transition-all">→</span>
                   Contact
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#privacy" className="text-gray-400 hover:text-blue-400 transition-colors duration-200 flex items-center group">
+                <Link to="/privacy" className="text-gray-400 hover:text-blue-400 transition-colors duration-200 flex items-center group">
                   <span className="mr-2 group-hover:mr-3 transition-all">→</span>
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#terms" className="text-gray-400 hover:text-blue-400 transition-colors duration-200 flex items-center group">
+                <Link to="/how-it-works" className="text-gray-400 hover:text-blue-400 transition-colors duration-200 flex items-center group">
                   <span className="mr-2 group-hover:mr-3 transition-all">→</span>
-                  Terms of Service
-                </a>
+                  How It Works
+                </Link>
               </li>
             </ul>
           </div>

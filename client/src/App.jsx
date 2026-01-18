@@ -9,6 +9,11 @@ import Home from './pages/public/Home';
 import Login from './pages/public/Login';
 import Register from './pages/public/Register';
 import RoleSelection from './pages/public/RoleSelection';
+import About from './pages/public/About';
+import HowItWorksPage from './pages/public/HowItWorksPage';
+import Contact from './pages/public/Contact';
+import FAQ from './pages/public/FAQ';
+import Privacy from './pages/public/Privacy';
 
 // Worker pages
 import WorkerLayout from './layouts/WorkerLayout';
@@ -46,6 +51,11 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/privacy" element={<Privacy />} />
 
           {/* Protected Routes */}
           <Route
