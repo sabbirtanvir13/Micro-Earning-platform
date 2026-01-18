@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { auth, googleProvider, isFirebaseConfigured } from '../services/firebase.config';
+import { auth, googleProvider, facebookProvider, githubProvider, isFirebaseConfigured } from '../services/firebase.config';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
@@ -140,12 +140,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const loginWithGoogle = async () => {
-    if (!auth || !isFirebaseConfigured || !googleProvider) {
+  const loginWithSocial = async (providerName) => {
+    if (!auth || !isFirebaseConfigured) {
       return { success: false, error: 'Firebase is not configured. Please set up Firebase authentication.' };
     }
+
+    let provider;
+    if (providerName === 'google') provider = googleProvider;
+    else if (providerName === 'facebook') provider = facebookProvider;
+    else if (providerName === 'github') provider = githubProvider;
+
+    if (!provider) {
+      return { success: false, error: `Provider ${providerName} is not initialized.` };
+    }
+
     try {
-      const result = await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, provider);
       const idToken = await result.user.getIdToken();
       const response = await api.post('/auth/verify-firebase', { idToken });
       const { token: jwtToken, user: userData } = response.data;
@@ -154,7 +164,7 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       return { success: true, user: userData };
     } catch (error) {
-      console.error('Google login error:', error);
+      console.error(`${providerName} login error:`, error);
       return { success: false, error: error.message };
     }
   };
@@ -196,7 +206,9 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     register,
-    loginWithGoogle,
+    loginWithGoogle: () => loginWithSocial('google'),
+    loginWithFacebook: () => loginWithSocial('facebook'),
+    loginWithGithub: () => loginWithSocial('github'),
     selectRole,
     logout,
   };

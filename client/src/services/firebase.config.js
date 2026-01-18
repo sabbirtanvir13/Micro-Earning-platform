@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, FacebookAuthProvider, GithubAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'demo-key',
@@ -11,24 +11,30 @@ const firebaseConfig = {
 };
 
 // Check if Firebase is properly configured
-const isFirebaseConfigured = import.meta.env.VITE_FIREBASE_API_KEY && 
+const isFirebaseConfigured = import.meta.env.VITE_FIREBASE_API_KEY &&
   import.meta.env.VITE_FIREBASE_API_KEY !== 'your_firebase_api_key' &&
   import.meta.env.VITE_FIREBASE_API_KEY !== '';
 
 let app;
 let auth;
 let googleProvider;
+let facebookProvider;
+let githubProvider;
 
 try {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
   googleProvider = new GoogleAuthProvider();
+  facebookProvider = new FacebookAuthProvider();
+  githubProvider = new GithubAuthProvider();
 } catch (error) {
   console.warn('Firebase initialization error (this is OK if you haven\'t set up Firebase yet):', error);
-  // Create mock auth object to prevent crashes
+  // Create mock auth objects to prevent crashes
   auth = null;
   googleProvider = null;
+  facebookProvider = null;
+  githubProvider = null;
 }
 
-export { auth, googleProvider, isFirebaseConfigured };
+export { auth, googleProvider, facebookProvider, githubProvider, isFirebaseConfigured };
 export default app;
