@@ -33,6 +33,7 @@ import BuyerProfile from './pages/buyer/BuyerProfile';
 import AdminLayout from './layouts/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminWithdrawals from './pages/admin/Withdrawals';
+import AdminAllTasks from './pages/admin/AllTasks';
 
 function App() {
   return (
@@ -100,7 +101,7 @@ function App() {
           >
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="withdrawals" element={<AdminWithdrawals />} />
-            <Route path="tasks" element={<div className="p-6"><h2 className="text-2xl font-bold">All Tasks</h2><p className="text-gray-600 mt-4">Task management coming soon...</p></div>} />
+            <Route path="tasks" element={<AdminAllTasks />} />
             <Route path="submissions" element={<div className="p-6"><h2 className="text-2xl font-bold">Submissions</h2><p className="text-gray-600 mt-4">Submission management coming soon...</p></div>} />
             <Route path="users" element={<div className="p-6"><h2 className="text-2xl font-bold">Users</h2><p className="text-gray-600 mt-4">User management coming soon...</p></div>} />
           </Route>
