@@ -10,11 +10,13 @@ const RoleSelection = () => {
   const navigate = useNavigate();
 
   // Redirect if role already selected
-  if (user && user.role && user.role !== 'worker') {
-    if (user.role === 'worker') navigate('/worker/dashboard');
-    else if (user.role === 'buyer') navigate('/buyer/dashboard');
-    else if (user.role === 'admin') navigate('/admin/dashboard');
-  }
+  useEffect(() => {
+    if (user && user.role) {
+      if (user.role === 'worker') navigate('/worker/dashboard');
+      else if (user.role === 'buyer') navigate('/buyer/dashboard');
+      else if (user.role === 'admin') navigate('/admin/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,11 +62,10 @@ const RoleSelection = () => {
             {/* Worker Card */}
             <div
               onClick={() => setSelectedRole('worker')}
-              className={`cursor-pointer border-2 rounded-lg p-6 transition-all ${
-                selectedRole === 'worker'
+              className={`cursor-pointer border-2 rounded-lg p-6 transition-all ${selectedRole === 'worker'
                   ? 'border-blue-600 bg-blue-50'
                   : 'border-gray-300 hover:border-gray-400'
-              }`}
+                }`}
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-semibold text-gray-900">Worker</h3>
@@ -88,11 +89,10 @@ const RoleSelection = () => {
             {/* Buyer Card */}
             <div
               onClick={() => setSelectedRole('buyer')}
-              className={`cursor-pointer border-2 rounded-lg p-6 transition-all ${
-                selectedRole === 'buyer'
+              className={`cursor-pointer border-2 rounded-lg p-6 transition-all ${selectedRole === 'buyer'
                   ? 'border-blue-600 bg-blue-50'
                   : 'border-gray-300 hover:border-gray-400'
-              }`}
+                }`}
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-semibold text-gray-900">Buyer</h3>
