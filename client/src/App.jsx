@@ -35,6 +35,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminWithdrawals from './pages/admin/Withdrawals';
 import AdminAllTasks from './pages/admin/AllTasks';
 import AdminAllSubmissions from './pages/admin/AllSubmissions';
+import AdminAllUsers from './pages/admin/AllUsers';
 
 function App() {
   return (
@@ -104,7 +105,7 @@ function App() {
             <Route path="withdrawals" element={<AdminWithdrawals />} />
             <Route path="tasks" element={<AdminAllTasks />} />
             <Route path="submissions" element={<AdminAllSubmissions />} />
-            <Route path="users" element={<div className="p-6"><h2 className="text-2xl font-bold">Users</h2><p className="text-gray-600 mt-4">User management coming soon...</p></div>} />
+            <Route path="users" element={<AdminAllUsers />} />
           </Route>
 
           {/* Catch all */}

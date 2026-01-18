@@ -21,23 +21,28 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      // Fetch real data from multiple endpoints
-      const tasksRes = await api.get('/tasks/available?limit=1000');
-      const withdrawalsRes = await api.get('/withdrawals');
+      const [tasksRes, withdrawalsRes, usersRes] = await Promise.all([
+        api.get('/tasks/available?limit=1000'),
+        api.get('/withdrawals'),
+        api.get('/auth/users'),
+      ]);
 
       const tasks = tasksRes.data.tasks || [];
       const withdrawals = withdrawalsRes.data.withdrawals || [];
+      const users = usersRes.data.users || [];
 
       const pending = withdrawals.filter(w => w.status === 'pending').length;
+      const workers = users.filter(u => u.role === 'worker').length;
+      const buyers = users.filter(u => u.role === 'buyer').length;
 
       setStats({
         totalTasks: tasks.length,
-        totalUsers: 150, // Placeholder - would need admin endpoint
+        totalUsers: users.length,
         pendingWithdrawals: pending,
         totalSubmissions: 320, // Placeholder
-        totalWorkers: 95,
-        totalBuyers: 55,
-        totalRevenue: 12500,
+        totalWorkers: workers,
+        totalBuyers: buyers,
+        totalRevenue: users.reduce((acc, curr) => acc + (curr.totalSpent || 0), 0),
       });
     } catch (error) {
       console.error('Failed to load stats:', error);
