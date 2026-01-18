@@ -41,7 +41,7 @@ const Hero = () => {
       {/* Grid Pattern Overlay */}
       <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
 
-      <div className="relative max-w-7xl mx-auto px-6 py-24 sm:py-32">
+      <div className="relative max-w-7xl mx-auto px-6 py-16 sm:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="space-y-8">
