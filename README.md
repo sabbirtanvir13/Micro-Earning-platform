@@ -71,9 +71,36 @@ npm start
 npm run dev
 ```
 
-## Environment Variables
+## 🌐 Environment Configuration
 
-See `.env.example` files in both client and server directories for required environment variables.
+To run this platform successfully, you must configure environment variables for both the **Client** and **Server**. 
+
+### 🖥️ Client Configuration (`/client/.env`)
+Create a `.env` file in the `client` directory:
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+VITE_FIREBASE_API_KEY=your_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_id
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
+VITE_IMGBB_API_KEY=your_imgbb_key
+```
+
+### ⚙️ Server Configuration (`/server/.env`)
+Create a `.env` file in the `server` directory:
+```env
+PORT=5000
+MONGODB_URI=mongodb+srv://...
+JWT_SECRET=your_jwt_secret
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..."
+FIREBASE_CLIENT_EMAIL=your_firebase_client_email
+IMGBB_API_KEY=your_imgbb_key
+```
+
+> **Note**: For Firebase Private Key, ensure it is wrapped in quotes and uses literal `\n` for newlines if stored in a `.env` file.
 
 ## Features
 
