@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import Header from '../../components/common/Header';
 import Footer from '../../components/common/Footer';
 import Hero from '../../components/common/Hero';
-import Features from '../../components/common/Features';
+import WhyChooseUs from '../../components/common/WhyChooseUs';
 import HowItWorks from '../../components/common/HowItWorks';
 import Testimonials from '../../components/common/Testimonials';
 import Newsletter from '../../components/common/Newsletter';
@@ -13,7 +13,7 @@ const Home = () => {
       <Header />
       <main>
         <Hero />
-        <Features />
+        <WhyChooseUs />
         <HowItWorks />
         <Testimonials />
         <Newsletter />
