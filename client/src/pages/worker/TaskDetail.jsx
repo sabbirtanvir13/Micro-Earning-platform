@@ -9,6 +9,7 @@ const TaskDetail = () => {
   const [task, setTask] = useState(null);
   const [submission, setSubmission] = useState(null);
   const [submissionText, setSubmissionText] = useState('');
+  const [submissionImage, setSubmissionImage] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -37,6 +38,7 @@ const TaskDetail = () => {
       await api.post('/submissions', {
         taskId: id,
         submissionText,
+        submissionImages: submissionImage ? [submissionImage] : [],
       });
       toast.success('Submission created successfully!');
       navigate('/worker/my-submissions');
@@ -91,7 +93,7 @@ const TaskDetail = () => {
                     Reference #{task._id.slice(-6).toUpperCase()}
                   </span>
                 </div>
-                <h1 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6 leading-tight uppercase tracking-tighter">
+                <h1 className="text-4xl lg:text-5xl font-black text-gray-900 mb-6 leading-tight uppercase tracking-tighter text-balance">
                   {task.title}
                 </h1>
                 <div className="flex flex-wrap gap-6 mb-10">
@@ -165,28 +167,60 @@ const TaskDetail = () => {
               </div>
             ) : task.status === 'open' || task.status === 'in_progress' ? (
               <div className="max-w-2xl mx-auto">
-                <div className="mb-10">
+                <div className="mb-10 text-center">
                   <h4 className="text-3xl font-black text-gray-900 mb-4">Finalize Completion</h4>
-                  <p className="text-gray-500 font-medium">Provide the requested proof or information to claim your reward.</p>
+                  <p className="text-gray-500 font-medium italic">Provide the requested proof or information to claim your reward.</p>
                 </div>
-                <form onSubmit={handleSubmit} className="space-y-8 text-left">
+                <form onSubmit={handleSubmit} className="space-y-10 text-left">
                   <div className="space-y-2">
                     <label className="text-sm font-black text-gray-900 uppercase tracking-widest ml-4">Detailed Proof / Deliverables</label>
                     <textarea
                       value={submissionText}
                       onChange={(e) => setSubmissionText(e.target.value)}
-                      rows={8}
-                      className="w-full px-8 py-6 rounded-[2rem] bg-gray-50 border-2 border-transparent focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/5 transition-all outline-none font-medium leading-relaxed"
+                      rows={6}
+                      className="w-full px-8 py-6 rounded-[2rem] bg-gray-50 border-2 border-transparent focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/5 transition-all outline-none font-medium leading-relaxed shadow-inner"
                       placeholder="Enter URLs, screenshots, or text proof here..."
                       required
                     />
                   </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-10">
+                    <div className="space-y-4">
+                      <label className="text-sm font-black text-gray-900 uppercase tracking-widest ml-4">Proof Screenshot URL</label>
+                      <div className="flex flex-col md:flex-row gap-6 items-start">
+                        <div className="flex-1 w-full relative group">
+                          <input
+                            type="url"
+                            value={submissionImage}
+                            onChange={(e) => setSubmissionImage(e.target.value)}
+                            className="w-full px-8 py-5 rounded-[2rem] bg-gray-50 border-2 border-transparent focus:bg-white focus:border-indigo-600 focus:ring-4 focus:ring-indigo-600/5 transition-all outline-none font-bold shadow-inner"
+                            placeholder="https://imgur.com/screenshot.jpg"
+                          />
+                          <div className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-indigo-600 transition-colors">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeWidth={2} /></svg>
+                          </div>
+                        </div>
+
+                        {submissionImage && (
+                          <div className="w-full md:w-32 h-32 rounded-[2rem] overflow-hidden border-4 border-white shadow-xl bg-gray-100 group">
+                            <img
+                              src={submissionImage}
+                              alt="Proof Preview"
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                              onError={(e) => { e.target.src = 'https://placehold.co/400x400?text=Invalid+Link'; }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   <button
                     type="submit"
                     disabled={submitting || !submissionText.trim()}
-                    className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white font-black py-6 rounded-3xl text-xl shadow-2xl shadow-indigo-500/20 hover:-translate-y-1 transition-all disabled:opacity-50"
+                    className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white font-black py-6 rounded-3xl text-xl shadow-2xl shadow-indigo-500/30 hover:-translate-y-1 transition-all disabled:opacity-50"
                   >
-                    {submitting ? 'Synchronizing Data...' : 'Submit Work Protocol'}
+                    {submitting ? 'Authenticating Submission...' : 'Securely Submit Proof →'}
                   </button>
                 </form>
               </div>
