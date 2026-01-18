@@ -150,44 +150,60 @@ const BrowseTasks = () => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {tasks.map((task) => (
-              <div key={task._id} className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition flex flex-col h-full">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
-                    {task.category || 'General'}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {new Date(task.createdAt).toLocaleDateString()}
-                  </span>
+              <div
+                key={task._id}
+                className="group bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 flex flex-col h-full hover:-translate-y-2"
+              >
+                {/* Image Section */}
+                <div className="relative h-56 overflow-hidden">
+                  <img
+                    src={task.image || `https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&q=80`}
+                    alt={task.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity"></div>
+                  <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center text-white">
+                    <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-black uppercase tracking-widest border border-white/30">
+                      {task.category || 'General'}
+                    </span>
+                    <span className="text-[10px] font-bold opacity-80 backdrop-blur-sm bg-black/20 px-2 py-1 rounded-lg">
+                      {new Date(task.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
                 </div>
 
-                <h3 className="text-xl font-semibold mb-2 line-clamp-1" title={task.title}>{task.title}</h3>
+                <div className="p-8 flex flex-col flex-grow">
+                  <h3 className="text-xl font-black text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors line-clamp-1" title={task.title}>
+                    {task.title}
+                  </h3>
 
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-grow">
-                  {task.description}
-                </p>
+                  <p className="text-gray-500 font-medium text-sm mb-6 line-clamp-2 flex-grow leading-relaxed">
+                    {task.description}
+                  </p>
 
-                <div className="border-t pt-4 mt-auto">
-                  <div className="flex justify-between items-center mb-4">
-                    <div className="flex flex-col">
-                      <span className="text-xs text-gray-500">Reward</span>
-                      <span className="font-bold text-green-600 text-lg">{task.coinsPerWorker} coins</span>
+                  <div className="pt-6 border-t border-gray-100 mt-auto">
+                    <div className="flex justify-between items-end mb-6">
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Reward Amount</p>
+                        <p className="text-2xl font-black text-emerald-600">{task.coinsPerWorker} <span className="text-xs uppercase">Coins</span></p>
+                      </div>
+                      <div className="text-right space-y-1">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-tighter">Availability</p>
+                        <p className={`text-sm font-black ${task.requiredWorkers - task.currentWorkers <= 5 ? 'text-red-500' : 'text-indigo-600'}`}>
+                          {task.requiredWorkers - task.currentWorkers} spots left
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex flex-col text-right">
-                      <span className="text-xs text-gray-500">Availability</span>
-                      <span className={`font-semibold ${task.currentWorkers >= task.requiredWorkers ? 'text-red-500' : 'text-blue-600'}`}>
-                        {task.requiredWorkers - task.currentWorkers} spots left
-                      </span>
-                    </div>
+
+                    <Link
+                      to={`/worker/tasks/${task._id}`}
+                      className="block w-full py-4 bg-gray-50 text-gray-900 font-black rounded-2xl hover:bg-indigo-600 hover:text-white hover:shadow-xl hover:shadow-indigo-500/30 transition-all text-center group-hover:bg-indigo-600 group-hover:text-white"
+                    >
+                      View Opportunities →
+                    </Link>
                   </div>
-
-                  <Link
-                    to={`/worker/tasks/${task._id}`}
-                    className="block w-full text-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-                  >
-                    View Details
-                  </Link>
                 </div>
               </div>
             ))}
